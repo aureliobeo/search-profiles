@@ -1,36 +1,34 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { Keyboard, ActivityIndicator } from 'react-native';
 import AsyncStorege from '@react-native-community/async-storage';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { Button, Keyboard, ActivityIndicator } from 'react-native';
 import api from '../../services/api';
-
 import {
+  Avatar,
+  Bio,
   Container,
   Form,
   Input,
-  SubmitButton,
   List,
-  User,
-  Avatar,
   Name,
-  Bio,
-  ProfileButton,
-  ProfileButtonText,
+  User,
 } from './styles';
 
-export default class Main extends Component {
-  state = {
-    newUser: '',
-    users: [],
-    loading: false,
-  };
+const propTypes = {
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func,
+  }).isRequired,
+};
 
-  static propTypes = {
-    navigation: PropTypes.shape({
-      navigate: PropTypes.func,
-    }).isRequired,
-  };
+export default class Main extends Component {
+  constructor() {
+    super();
+    this.state = {
+      newUser: '',
+      users: [],
+      loading: false,
+    };
+  }
 
   async componentDidMount() {
     const users = await AsyncStorege.getItem('users');
@@ -71,9 +69,20 @@ export default class Main extends Component {
   };
 
   handleNavigate = users => {
+    console.log(this.props);
     const { navigation } = this.props;
 
     navigation.navigate('User', { users });
+  };
+
+  handleRemoveUser = user => {
+    let { users } = this.state;
+
+    users = users.filter(userFiltered => userFiltered.login !== user.login);
+
+    this.setState({
+      users: [...users],
+    });
   };
 
   static navigationOptions = {
@@ -94,13 +103,19 @@ export default class Main extends Component {
             returnKeyType="send"
             onSubmitEditing={this.handleAddUser}
           />
-          <SubmitButton loading={loading} onPress={this.handleAddUser}>
+          <Button
+            title="Add"
+            size={20}
+            color="#7159c1"
+            onPress={this.handleAddUser}
+          >
+            {' '}
             {loading ? (
               <ActivityIndicator color="#FFF" />
             ) : (
-              <Icon name="add" size={20} color="#FFF" />
+              <Button name="add" size={20} color="#FFF" />
             )}
-          </SubmitButton>
+          </Button>
         </Form>
         <List
           data={users}
@@ -110,9 +125,16 @@ export default class Main extends Component {
               <Avatar source={{ uri: item.avatar }} />
               <Name>{item.name}</Name>
               <Bio>{item.bio}</Bio>
-              <ProfileButton onPress={() => this.handleNavigate(item)}>
-                <ProfileButtonText>Ver perfil</ProfileButtonText>
-              </ProfileButton>
+              <Button
+                title="Ver Perfil"
+                onPress={() => this.handleNavigate(item)}
+              />
+              <Button
+                title="Remover"
+                onPress={() => this.handleRemoveUser(item)}
+                size={20}
+                color="#7159c1"
+              />
             </User>
           )}
         />
@@ -120,3 +142,5 @@ export default class Main extends Component {
     );
   }
 }
+
+Main.propTypes = propTypes;
