@@ -29,7 +29,10 @@ export default class User extends Component {
   constructor() {
     super();
     this.state = {
+      user: null,
       stars: [],
+      repositories: [],
+      loading: true,
     };
   }
 
@@ -37,15 +40,28 @@ export default class User extends Component {
     const { navigation } = this.props;
     const user = navigation.getParam('users');
 
-    const response = await api.get(`/users/${user.login}/starred`);
+    const starredRepositories = await api.get(`/users/${user.login}/starred`);
 
-    this.setState({ stars: response.data });
+    const userRepositories = await api.get(`/users/${user.login}/repos`);
+
+    this.setState({
+      stars: starredRepositories.data,
+      user,
+      repositories: userRepositories.data,
+      loading: false,
+    });
   }
 
   render() {
-    const { navigation } = this.props;
-    const { stars } = this.state;
-    const user = navigation.getParam('users');
+    const { stars, repositories, user, loading } = this.state;
+
+    if (loading) {
+      return (
+        <Container>
+          <Name>Carregando</Name>
+        </Container>
+      );
+    }
 
     return (
       <Container>
@@ -57,6 +73,19 @@ export default class User extends Component {
         <Stars
           data={stars}
           keyExtractor={star => String(star.id)}
+          renderItem={({ item }) => (
+            <Starred>
+              <OwnerAvatar source={{ uri: item.owner.avatar_url }} />
+              <Info>
+                <Title>{item.name}</Title>
+                <Author>{item.owner.login}</Author>
+              </Info>
+            </Starred>
+          )}
+        />
+        <Stars
+          data={repositories}
+          keyExtractor={repository => String(repository.id)}
           renderItem={({ item }) => (
             <Starred>
               <OwnerAvatar source={{ uri: item.owner.avatar_url }} />

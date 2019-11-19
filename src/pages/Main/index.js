@@ -1,7 +1,9 @@
 import AsyncStorege from '@react-native-community/async-storage';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { Button, Keyboard, ActivityIndicator } from 'react-native';
+import { ActivityIndicator, Keyboard, View } from 'react-native';
+import { Button, Card, Text } from 'react-native-elements';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import api from '../../services/api';
 import {
   Avatar,
@@ -48,6 +50,18 @@ export default class Main extends Component {
   handleAddUser = async () => {
     const { users, newUser } = this.state;
 
+    let userAlreadyExists = false;
+
+    users.forEach(user => {
+      if (user.login === newUser) {
+        userAlreadyExists = true;
+      }
+    });
+
+    if (userAlreadyExists) {
+      return;
+    }
+
     this.setState({ loading: true });
 
     const response = await api.get(`/users/${newUser}`);
@@ -69,7 +83,6 @@ export default class Main extends Component {
   };
 
   handleNavigate = users => {
-    console.log(this.props);
     const { navigation } = this.props;
 
     navigation.navigate('User', { users });
@@ -94,48 +107,57 @@ export default class Main extends Component {
     return (
       <Container>
         <Form>
-          <Input
-            autoCorrect={false}
-            autoCapitalize="none"
-            placeholder="Adicionar usuario"
-            value={newUser}
-            onChangeText={text => this.setState({ newUser: text })}
-            returnKeyType="send"
-            onSubmitEditing={this.handleAddUser}
-          />
-          <Button
-            title="Add"
-            size={20}
-            color="#7159c1"
-            onPress={this.handleAddUser}
-          >
-            {' '}
-            {loading ? (
-              <ActivityIndicator color="#FFF" />
-            ) : (
-              <Button name="add" size={20} color="#FFF" />
-            )}
-          </Button>
+          <View style={{ flex: 1, flexDirection: 'row' }}>
+            <View style={{ flex: 1, paddingRight: 12 }}>
+              <Input
+                autoCorrect={false}
+                autoCapitalize="none"
+                placeholder="Adicionar usuario"
+                value={newUser}
+                onChangeText={text => this.setState({ newUser: text })}
+                returnKeyType="send"
+                onSubmitEditing={this.handleAddUser}
+              />
+            </View>
+            <Button
+              type="solid"
+              buttonStyle={{ backgroundColor: '#7159c1' }}
+              color="#7159c1"
+              onPress={this.handleAddUser}
+              icon={<Icon name="add" size={25} color="white" />}
+            >
+              {loading ? (
+                <ActivityIndicator color="#FFF" />
+              ) : (
+                <Button name="add" size={20} color="#FFF" />
+              )}
+            </Button>
+          </View>
         </Form>
         <List
           data={users}
           keyExtractor={user => user.login}
           renderItem={({ item }) => (
-            <User>
-              <Avatar source={{ uri: item.avatar }} />
-              <Name>{item.name}</Name>
-              <Bio>{item.bio}</Bio>
-              <Button
-                title="Ver Perfil"
-                onPress={() => this.handleNavigate(item)}
-              />
-              <Button
-                title="Remover"
-                onPress={() => this.handleRemoveUser(item)}
-                size={20}
-                color="#7159c1"
-              />
-            </User>
+            <Card>
+              <User>
+                <View style={{ position: 'absolute', right: 0, top: 0 }}>
+                  <Button
+                    type="clear"
+                    onPress={() => this.handleRemoveUser(item)}
+                    icon={<Icon name="delete" size={30} color="red" />}
+                  />
+                </View>
+                <Avatar source={{ uri: item.avatar }} />
+                <Name>{item.name}</Name>
+                <Bio>{item.bio}</Bio>
+                <Button
+                  title="Ver Perfil"
+                  buttonStyle={{ backgroundColor: '#7159c1', width: 200 }}
+                  color="#7159c1"
+                  onPress={() => this.handleNavigate(item)}
+                />
+              </User>
+            </Card>
           )}
         />
       </Container>
