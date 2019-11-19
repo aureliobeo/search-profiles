@@ -2,11 +2,11 @@ import AsyncStorege from '@react-native-community/async-storage';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { ActivityIndicator, Keyboard, View } from 'react-native';
-import { Button, Card, Text } from 'react-native-elements';
+import { Button, Card, Text, Avatar, Badge, withBadge } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import api from '../../services/api';
 import {
-  Avatar,
+
   Bio,
   Container,
   Form,
@@ -119,19 +119,24 @@ export default class Main extends Component {
                 onSubmitEditing={this.handleAddUser}
               />
             </View>
-            <Button
-              type="solid"
-              buttonStyle={{ backgroundColor: '#7159c1' }}
-              color="#7159c1"
-              onPress={this.handleAddUser}
-              icon={<Icon name="add" size={25} color="white" />}
-            >
+            <View>
               {loading ? (
-                <ActivityIndicator color="#FFF" />
+                <Button loading
+                  buttonStyle={{ backgroundColor: '#7159c1' }}
+                  color="#7159c1"
+                  icon={<Icon
+                    name="arrow-right"
+                    size={25}
+                    color="white" />
+                  } />
               ) : (
-                <Button name="add" size={20} color="#FFF" />
-              )}
-            </Button>
+                  <Button type="solid"
+                    buttonStyle={{ backgroundColor: '#7159c1' }}
+                    color="#7159c1"
+                    onPress={this.handleAddUser}
+                    icon={<Icon name="add" size={25} color="white" />} />
+                )}
+            </View>
           </View>
         </Form>
         <List
@@ -147,15 +152,11 @@ export default class Main extends Component {
                     icon={<Icon name="delete" size={30} color="red" />}
                   />
                 </View>
-                <Avatar source={{ uri: item.avatar }} />
+                <Avatar source={{ uri: item.avatar }}
+                  onPress={() => this.handleNavigate(item)}
+                  size="large" rounded title="LW" />
                 <Name>{item.name}</Name>
                 <Bio>{item.bio}</Bio>
-                <Button
-                  title="Ver Perfil"
-                  buttonStyle={{ backgroundColor: '#7159c1', width: 200 }}
-                  color="#7159c1"
-                  onPress={() => this.handleNavigate(item)}
-                />
               </User>
             </Card>
           )}

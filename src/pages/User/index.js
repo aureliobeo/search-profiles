@@ -14,6 +14,8 @@ import {
   Title,
   Author,
 } from './styles';
+import { ButtonGroup, Text, Button, Icon } from 'react-native-elements';
+import {ActivityIndicator} from 'react-native'
 
 const propTypes = {
   navigation: PropTypes.shape({
@@ -33,6 +35,7 @@ export default class User extends Component {
       stars: [],
       repositories: [],
       loading: true,
+      selectedIndex: 0
     };
   }
 
@@ -52,13 +55,42 @@ export default class User extends Component {
     });
   }
 
-  render() {
+  async favorito() {
     const { stars, repositories, user, loading } = this.state;
+
+    <Stars
+      data={stars}
+      keyExtractor={star => String(star.id)}
+      renderItem={({ item }) => (
+        <Starred>
+          <OwnerAvatar source={{ uri: item.owner.avatar_url }} />
+          <Info>
+            <Title>{item.name}</Title>
+            <Author>{item.owner.login}</Author>
+          </Info>
+        </Starred>
+      )}
+    />
+  }
+
+  changeButtonIndex(selectedIndex) {
+    this.setState({
+      selectedIndex
+    });
+  }
+
+  render() {
+    const { stars, repositories, user, loading, selectedIndex } = this.state;
+
+    const component2 = () => <Text>Starred</Text>
+    const component3 = () => <Text>Repositories</Text>
+
+    const buttons = [{ element: component2 }, { element: component3 }]
 
     if (loading) {
       return (
         <Container>
-          <Name>Carregando</Name>
+          <ActivityIndicator size="large" color="#0000ff"/>
         </Container>
       );
     }
@@ -70,32 +102,42 @@ export default class User extends Component {
           <Name>{user.name}</Name>
           <Bio>{user.bio}</Bio>
         </Header>
-        <Stars
-          data={stars}
-          keyExtractor={star => String(star.id)}
-          renderItem={({ item }) => (
-            <Starred>
-              <OwnerAvatar source={{ uri: item.owner.avatar_url }} />
-              <Info>
-                <Title>{item.name}</Title>
-                <Author>{item.owner.login}</Author>
-              </Info>
-            </Starred>
+        <ButtonGroup
+          onPress={(index) => {
+            this.changeButtonIndex(index);
+          }}
+          selectedIndex={selectedIndex}
+          buttons={buttons}>
+        </ButtonGroup>
+        {selectedIndex == 0 ? (
+          <Stars
+            data={stars}
+            keyExtractor={star => String(star.id)}
+            renderItem={({ item }) => (
+              <Starred>
+                <OwnerAvatar source={{ uri: item.owner.avatar_url }} />
+                <Info>
+                  <Title>{item.name}</Title>
+                  <Author>{item.owner.login}</Author>
+                </Info>
+              </Starred>
+            )}
+          />
+        ) : (
+            <Stars
+              data={repositories}
+              keyExtractor={repository => String(repository.id)}
+              renderItem={({ item }) => (
+                <Starred>
+                  <OwnerAvatar source={{ uri: item.owner.avatar_url }} />
+                  <Info>
+                    <Title>{item.name}</Title>
+                    <Author>{item.owner.login}</Author>
+                  </Info>
+                </Starred>
+              )}
+            />
           )}
-        />
-        <Stars
-          data={repositories}
-          keyExtractor={repository => String(repository.id)}
-          renderItem={({ item }) => (
-            <Starred>
-              <OwnerAvatar source={{ uri: item.owner.avatar_url }} />
-              <Info>
-                <Title>{item.name}</Title>
-                <Author>{item.owner.login}</Author>
-              </Info>
-            </Starred>
-          )}
-        />
       </Container>
     );
   }
